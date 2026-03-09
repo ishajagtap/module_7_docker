@@ -22,18 +22,32 @@ def generate_qr_code(data, filename="qrcode.png"):
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    print("=== QR Code Generator ===")
-    data_to_encode = input("Enter the data or URL to encode: ")
+    import argparse
+    import os
     
-    if not data_to_encode.strip():
+    parser = argparse.ArgumentParser(description="QR Code Generator")
+    parser.add_argument("--url", help="The data or URL to encode", type=str)
+    parser.add_argument("--output", help="The output filename", type=str, default="qrcode.png")
+    
+    args = parser.parse_args()
+    
+    print("=== QR Code Generator ===")
+    
+    data_to_encode = args.url
+    if not data_to_encode:
+        # Fallback to interactive input if no argument was passed
+        data_to_encode = input("Enter the data or URL to encode: ")
+        
+    if not data_to_encode or not data_to_encode.strip():
         print("Data cannot be empty. Exiting.")
         sys.exit(1)
         
-    output_filename = input("Enter the output filename (press enter for default 'qrcode.png'): ")
-    
-    if not output_filename.strip():
-        output_filename = "qrcode.png"
-    elif not output_filename.endswith(('.png', '.jpg', '.jpeg')):
+    output_filename = args.output
+    if not output_filename.endswith(('.png', '.jpg', '.jpeg')):
         output_filename += ".png"
+        
+    # Optional: Save to the qr_codes directory if it exists (for Docker)
+    if os.path.exists("qrcodes"):
+        output_filename = os.path.join("qrcodes", output_filename)
         
     generate_qr_code(data_to_encode, output_filename)
